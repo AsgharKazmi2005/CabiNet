@@ -8,7 +8,7 @@ const openai = new OpenAI({
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { image, inventoryItems } = body;
+    const { image, inventoryItems } = body; 
 
     if (!image) {
       return NextResponse.json({ error: 'No image data received' }, { status: 400 });
