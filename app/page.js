@@ -8,7 +8,7 @@ import Dashboard from '../components/Dashboard';
 import InventoryList from '../components/InventoryList';
 import AddRemoveItems from '../components/AddRemoveItems';
 import Analytics from '../components/Analytics';
-import Settings from '../components/Settings';
+import Settings from '../components/Settings'; 
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState('Dashboard');
