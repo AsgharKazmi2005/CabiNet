@@ -6,7 +6,7 @@ export async function POST(request) {
   const body = await request.json();
   console.log('Request body:', body);
 
-  const { ingredients } = body;
+  const { ingredients } = body; 
 
   if (!ingredients || (Array.isArray(ingredients) && ingredients.length === 0)) {
     return NextResponse.json({ message: 'Invalid ingredients list' }, { status: 400 });
