@@ -20,12 +20,13 @@ export async function POST(request) {
 
     console.log('Sending request to OpenAI API...');
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
         {
           role: "user",
           content: [
-            { type: "text", text: `Which fruit and vegetable is in this image that I am holding in the hand? If it's one of these items: ${inventoryItems.join(', ')}, respond with that item name. If it's a fruit or vegetable not in the list, respond with the name of the fruit or vegetable. If its not a fruit or vegetable, respond with none` },
+            { type: "text", text: `Which item is in this image that I am holding in the hand? If it is not a kitchen ingredient, return none. If it's one of these items: ${inventoryItems.join(', ')}, respond with just that item name. If it's an item not in the list, respond with the name of the item. For example, if the item I am holding is an apple, you must respond with 'Apple'. Make sure the first character of every word of the response is always capitalized. For example, return 'Apple
+             and not 'apple'` },
             { type: "image_url", image_url: { url: image } }
           ],
         },

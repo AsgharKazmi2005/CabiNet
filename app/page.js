@@ -9,6 +9,7 @@ import InventoryList from '../components/InventoryList';
 import AddRemoveItems from '../components/AddRemoveItems';
 import Analytics from '../components/Analytics';
 import Settings from '../components/Settings';
+import NavBar from "../components/NavBar";
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState('Dashboard');
@@ -45,11 +46,13 @@ export default function Home() {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
+    
+    <Box sx={{ display: "flex", padding: 0 }}>
       <CssBaseline />
       {/* <TopBar toggleDrawer={toggleDrawer} /> */}
       {/* <Sidebar open={drawerOpen} onClose={toggleDrawer(false)} onPageChange={handlePageChange} /> */}
-      <Box component="main"sx={{ flexGrow: 1, p: 3, mt: 0, pt: 2 }}>
+      <Box component="main"sx={{ flexGrow: 1, mt: 0, }}>
+      <NavBar />
         {currentPage === "Dashboard" && <Dashboard />}
         {currentPage === "Inventory" && <InventoryList />}
         {currentPage === "Add/Remove" && <AddRemoveItems />}
