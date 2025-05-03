@@ -5,7 +5,7 @@ export default function Settings() {
   const [settings, setSettings] = useState({
     notifications: true,
     darkMode: false,
-    autoUpdate: true,
+    autoUpdate: true, 
   });
 
   const handleToggle = (setting) => {

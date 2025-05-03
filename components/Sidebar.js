@@ -10,7 +10,7 @@ const menuItems = [
   { text: 'Inventory', icon: <InventoryIcon /> },
   { text: 'Add/Remove', icon: <AddCircleIcon /> },
   { text: 'Analytics', icon: <AnalyticsIcon /> },
-  { text: 'Settings', icon: <SettingsIcon /> },
+  { text: 'Settings', icon: <SettingsIcon /> }, 
 ];
 
 export default function Sidebar({ open, onClose, onPageChange }) {

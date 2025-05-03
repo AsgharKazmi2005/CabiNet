@@ -5,7 +5,7 @@ import {
   Paper,
   Table,
   TableBody,
-  TableCell,
+  TableCell, 
   TableContainer,
   TableHead,
   TableRow,
