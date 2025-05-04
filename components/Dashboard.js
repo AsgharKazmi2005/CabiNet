@@ -460,7 +460,7 @@ export default function Dashboard() {
               startIcon={<RestaurantIcon />}
               onClick={() => setOpenRecipeSuggestion(true)}
             >
-              Suggest Recipe
+              Quick Recipe
             </StyledButton>
           </Box>
 
