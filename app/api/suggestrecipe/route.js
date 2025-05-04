@@ -4,13 +4,17 @@ export async function POST(request) {
   console.log('✅ API route called');
 
   const body = await request.json();
-  const { ingredients, options, prompt } = body;
+  const {
+    ingredients,
+    options = {},
+    prompt = "Make a recipe",
+  } = body;
 
   console.log('🔸 Received pantry ingredients:', ingredients);
   console.log('🔸 User prompt:', prompt);
   console.log('🔸 Options:', options);
 
-  if (!ingredients || (Array.isArray(ingredients) && ingredients.length === 0)) {
+  if (!ingredients || ingredients.length === 0) {
     return NextResponse.json({ message: 'Invalid pantry ingredients' }, { status: 400 });
   }
 
@@ -20,44 +24,48 @@ export async function POST(request) {
   }
 
   try {
-    const pantryList = Array.isArray(ingredients) ? ingredients.join(', ') : ingredients;
-    const mustHaves = options?.mustHaves?.join(', ') || 'none';
-    const dietary = options?.dietary?.join(', ') || 'none';
-const pantryText = Array.isArray(ingredients) ? ingredients.join(', ') : "none";
+    const pantryText = ingredients.join(', ');
+    const mustHaves = options.mustHaveIngredients || 'none';
+    const dietary = Array.isArray(options.dietary) ? options.dietary.join(', ') : 'none';
 
-const systemMessage = `You are a helpful assistant that suggests recipes.
+    const systemMessage = `You are a strict recipe-generating assistant.
 
 Pantry:
 ${pantryText}
 
-User Request: ${prompt || "Make a recipe"}
+User Request: ${prompt}
 
 Constraints:
-- Must Include: ${options?.mustHaves?.join(', ') || 'none'}
-- Dietary: ${options?.dietary?.join(', ') || 'none'}
-- Serving Size: ${options?.servingSize || 'any'}
-- Calories per Serving: ${options?.calories || 'no preference'}
-- Cuisine Preference: ${options?.cuisine || 'any'}
-- Uniqueness: ${options?.uniqueness || '3'}/5
-- Sweetness/Spice Level: ${options?.spice || '3'}/5
+- Must Include: ${mustHaves}
+- Dietary: ${dietary}
+- Serving Size: ${options.servingSize || 'any'}
+- Calories per Serving: ${options.calories || 'no preference'}
+- Cuisine Preference: ${options.cuisine || 'any'}
+- Uniqueness: ${options.uniqueness || '3'}/5
+- Sweetness/Spice Level: ${options.spice || '3'}/5
 
 ✅ Your task:
 - Suggest ONE recipe.
 - You MUST ONLY use ingredients from the pantry.
 - You MUST NOT add anything not listed, unless it's water, salt, or pepper.
-- Respect all constraints. If something cannot be done, mention it.
+- Respect all constraints. If something cannot be done, say so.
 
-Return format:
-Recipe: [name]
-Ingredients:
-[list]
-Instructions:
-[step-by-step numbered list]
-`;
+❗ Return format (STRICT JSON only):
+
+{
+  "name": "Recipe name",
+  "ingredients": ["1 cup rice", "2 carrots", "..."],
+  "steps": ["Do this", "Do that", "..."],
+  "ingredientsWithQuantities": [
+    { "name": "Rice", "quantity": 1 },
+    { "name": "Carrots", "quantity": 2 }
+  ]
+}
+
+⚠️ The ingredientsWithQuantities array MUST match ingredient names from the pantry list exactly, and quantities MUST be numbers only.`;
 
     console.log('=== OpenAI API CALL ===');
-    console.log('Model: gpt-4-turbo');
-    console.log('=======================');
+    console.log('Prompt:\n', systemMessage);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -67,10 +75,9 @@ Instructions:
       },
       body: JSON.stringify({
         model: "gpt-4-turbo",
-        messages: [
-          { role: "system", content: systemMessage }
-        ],
-        max_tokens: 800
+        messages: [{ role: "system", content: systemMessage }],
+        temperature: 0.7,
+        max_tokens: 800,
       }),
     });
 
@@ -81,24 +88,30 @@ Instructions:
     }
 
     const data = await response.json();
-    const recipeText = data.choices[0].message.content;
+    const raw = data.choices[0].message.content;
 
-    console.log('✅ OpenAI API response:', recipeText);
+    let recipe;
+    try {
+      recipe = JSON.parse(raw);
+    } catch (e) {
+      console.error('❌ Failed to parse strict JSON:', raw);
+      return NextResponse.json({
+        message: 'OpenAI response was not valid JSON.',
+        error: e.message,
+      }, { status: 500 });
+    }
 
-    const recipeParts = recipeText.split('\n\n');
-    const recipe = {
-      name: recipeParts[0].replace('Recipe:', '').trim(),
-      ingredients: recipeParts[1]
-        .replace('Ingredients:\n', '')
-        .split('\n')
-        .map(line => line.trim()),
-      steps: recipeParts[2]
-        .replace('Instructions:\n', '')
-        .split('\n')
-        .map(line => line.replace(/^\d+\.\s*/, '').trim()),
-    };
+    // Final validation (optional but smart)
+    if (
+      !recipe.name || !Array.isArray(recipe.ingredients) || !Array.isArray(recipe.steps) ||
+      !Array.isArray(recipe.ingredientsWithQuantities)
+    ) {
+      return NextResponse.json({
+        message: 'Invalid recipe format returned from OpenAI.',
+      }, { status: 500 });
+    }
 
-    console.log('✅ Sending recipe:', recipe);
+    console.log('✅ Final recipe object:', recipe);
     return NextResponse.json({ recipe });
 
   } catch (error) {
@@ -109,4 +122,3 @@ Instructions:
     }, { status: 500 });
   }
 }
-
