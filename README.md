@@ -1,4 +1,4 @@
-Inventory Management Suite
+CabiNet - CSCI 318 Project
 
 Utilizes Next.js and Material UI to handle user input while offering a neat design and a graphical analysis of the inventory. 
 
